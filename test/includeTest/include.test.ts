@@ -5,7 +5,7 @@ import * as path from 'path';
 
 import * as vscode from 'vscode';
 
-suite("Word Count Tests", () => {
+suite("Include tests", () => {
 
 	test("Can parse an include statement", async () => {
 		let document = await vscode.workspace.openTextDocument(path.join(__dirname, "../../../test/includeTest/root.http"));
@@ -15,7 +15,8 @@ suite("Word Count Tests", () => {
 		assert.equal(ir.children[0].type, IR.NodeType.Include);
 		let includeNode = ir.children[0] as IR.IncludeNode;
 
-		let childDocument = includeNode.includedDocument;
+		let childTextDocument = await vscode.workspace.openTextDocument(includeNode.absolutePath);
+		let childDocument = await IR.parse(childTextDocument);
 		assert.equal(childDocument.children.length, 1);
 		let variableNode = childDocument.children[0] as IR.FileVariableNode;
 		assert.equal(variableNode.type, IR.NodeType.FileVariable);
