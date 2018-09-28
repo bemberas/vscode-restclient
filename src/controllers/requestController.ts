@@ -77,7 +77,11 @@ export class RequestController {
         }
 
         // remove file variables definition lines and leading empty lines
-        selectedText = ArrayUtility.skipWhile(lines, l => Constants.FileVariableDefinitionRegex.test(l) || l.trim() === '').join(EOL);
+        selectedText = ArrayUtility.skipWhile(lines, l =>
+            Constants.FileVariableDefinitionRegex.test(l)
+            || Selector.isIncludeLine(l)
+            || l.trim() === ''
+        ).join(EOL);
 
         // variables replacement
         selectedText = await VariableProcessor.processRawRequest(selectedText);

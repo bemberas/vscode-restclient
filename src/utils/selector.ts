@@ -54,6 +54,10 @@ export class Selector {
         return Selector.responseStatusLineRegex.test(line);
     }
 
+    public static isIncludeLine(line: string): boolean {
+        return Constants.IncludeRegex.test(line);
+    }
+
     private getDelimitedText(fullText: string, currentLine: number): string {
         let lines: string[] = fullText.split(Constants.LineSplitterRegex);
         let delimiterLineNumbers: number[] = Selector.getDelimiterRows(lines);

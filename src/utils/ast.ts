@@ -53,8 +53,6 @@ export type Node =
     | DocumentNode
     | RequestNode
 
-const IncludeRegex = /^(@@include\s+)(.+)\s*$/;
-
 const requestParserFactory = new RequestParserFactory();
 
 class DocumentParser {
@@ -120,7 +118,7 @@ class DocumentParser {
 
     private tryParseIncludeNode(): IncludeNode | undefined {
         let line = this.getCurrentLine();
-        let match = line.text.match(IncludeRegex);
+        let match = line.text.match(Constants.IncludeRegex);
         if (match == null)
         {
             return undefined;
