@@ -6,6 +6,7 @@ import * as url from 'url';
 import { CancellationToken, DocumentLink, DocumentLinkProvider, Position, Range, TextDocument, Uri } from 'vscode';
 import * as Constants from '../common/constants';
 import { getWorkspaceRootPath } from '../utils/workspaceUtility';
+import * as Ast from '../utils/ast';
 
 export class RequestBodyDocumentLinkProvider implements DocumentLinkProvider {
 
@@ -31,8 +32,24 @@ export class RequestBodyDocumentLinkProvider implements DocumentLinkProvider {
                 ));
             }
         }
+        return results.concat(this.getIncludeLinks(document));
+    }
 
-        return results;
+    private getIncludeLinks(document: TextDocument): DocumentLink[] {
+        let ast = Ast.parse(document);
+        let links = [];
+        for (let node of ast.children) {
+            if (node.type != Ast.NodeType.Include)
+                continue;
+            
+            let targetUri = document.uri.with({
+                path: path.join(path.dirname(document.uri.path), node.path.relativePath)
+            });
+            
+            links.push(new DocumentLink(node.path.range, targetUri));
+        }
+
+        return links;
     }
 
     private normalizeLink(document: TextDocument, link: string, base: string): Uri {
