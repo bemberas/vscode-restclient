@@ -79,7 +79,7 @@ class DocumentParser {
         return this.currentLine >= this.document.lineCount;
     }
 
-    async parse(): Promise<DocumentNode> {
+    parse(): DocumentNode {
         while (!this.hasReachedEnd)
         {
             // Skip empty lines
@@ -88,7 +88,7 @@ class DocumentParser {
                 this.currentLine++;
             }
 
-            let node = await this.tryParseNode();
+            let node = this.tryParseNode();
             if (node != undefined)
             {
                 this.documentNode.children.push(node);
@@ -102,15 +102,15 @@ class DocumentParser {
         return this.documentNode;
     }
 
-    private tryParseNode(): Promise<Node | undefined> {
-        return tryMany<Node | undefined>(
+    private tryParseNode(): Node | undefined {
+        return either<Node | undefined>(
             this.tryParseIncludeNode,
             this.tryParseFileVariableNode,
             this.tryParseRequestNode
         );
     }
 
-    private async tryParseIncludeNode(): Promise<IncludeNode | undefined> {
+    private tryParseIncludeNode(): IncludeNode | undefined {
         let line = this.getCurrentLine();
         let match = line.text.match(IncludeRegex);
         if (match == null)
@@ -132,7 +132,7 @@ class DocumentParser {
         };
     }
 
-    private async tryParseFileVariableNode(): Promise<FileVariableNode | undefined> {
+    private tryParseFileVariableNode(): FileVariableNode | undefined {
         let line = this.getCurrentLine();
         let match = line.text.match(Constants.FileVariableDefinitionRegex);
         if (match == null) {
@@ -151,7 +151,7 @@ class DocumentParser {
         };
     }
 
-    private async tryParseRequestNode(): Promise<RequestNode | undefined> {
+    private tryParseRequestNode(): RequestNode | undefined {
         let firstLine = this.getCurrentLine();
         if (firstLine.isEmptyOrWhitespace)
             return undefined;
@@ -189,33 +189,33 @@ class DocumentParser {
         if (requestText.trim().length == 0)
             return undefined;
 
-        let parser = requestParserFactory.createRequestParser(requestText);
-        let request = parser.parseHttpRequest(requestText, this.document.fileName);
-
         return {
             type: NodeType.Request,
             textDocument: this.document,
             range,
-            request: null as any,
+            get request() {
+                let parser = requestParserFactory.createRequestParser(requestText);
+                return parser.parseHttpRequest(requestText, this.document.fileName);
+            },
         }
     }
 }
 
 const RequestEndRegex = /^#{3,}|^@/;
 
-type TryFunc<T> = () => Promise<T>;
+type TryFunc<T> = () => T | undefined;
 
-async function tryMany<T>(...funcs: Array<TryFunc<T | undefined>>): Promise<T | undefined>
+function either<T>(...funcs: Array<TryFunc<T | undefined>>): T | undefined
 {
     for (let func of funcs)
     {
-        let result = await func();
+        let result = func();
         if (result != undefined)
             return result;
     }
     return undefined;
 }
 
-export function parse(document: TextDocument) : Promise<DocumentNode> {
+export function parse(document: TextDocument) : DocumentNode {
     return new DocumentParser(document).parse();
 }

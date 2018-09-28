@@ -16,7 +16,7 @@ suite("Include tests", () => {
 		let includeNode = ir.children[0] as Ast.IncludeNode;
 
 		let childTextDocument = await vscode.workspace.openTextDocument(includeNode.absolutePath);
-		let childDocument = await Ast.parse(childTextDocument);
+		let childDocument = Ast.parse(childTextDocument);
 		assert.equal(childDocument.children.length, 1);
 		let variableNode = childDocument.children[0] as Ast.FileVariableNode;
 		assert.equal(variableNode.type, Ast.NodeType.FileVariable);
