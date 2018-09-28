@@ -233,6 +233,25 @@
                 <key>name</key>
                 <string>http.filevariable</string>
             </dict>
+            <dict>
+                <key>captures</key>
+                <dict>
+                    <key>1</key>
+                    <dict>
+                        <key>name</key>
+                        <string>keyword.control.http</string>
+                    </dict>
+                    <key>2</key>
+                    <dict>
+                        <key>name</key>
+                        <string>string.other.http</string>
+                    </dict>
+                </dict>
+                <key>match</key>
+                <string>^(@@include)\s+(.*)\s*$</string>
+                <key>name</key>
+                <string>http.include</string>
+            </dict>
         </array>
     </dict>
 </plist>
