@@ -17,6 +17,11 @@ export interface IncludeNode {
     type: NodeType.Include,
     sourceDocument: DocumentNode
     range: Range
+    path: IncludePath
+}
+
+export interface IncludePath {
+    range: Range
     relativePath: string
     absolutePath: string
 }
@@ -48,7 +53,7 @@ export type Node =
     | DocumentNode
     | RequestNode
 
-const IncludeRegex = /^@@include\s+(.+)\s*$/;
+const IncludeRegex = /^(@@include\s+)(.+)\s*$/;
 
 const requestParserFactory = new RequestParserFactory();
 
@@ -83,10 +88,13 @@ class DocumentParser {
         while (!this.hasReachedEnd)
         {
             // Skip empty lines
-            while(this.getCurrentLine().isEmptyOrWhitespace && !this.hasReachedEnd)
+            while(!this.hasReachedEnd && this.getCurrentLine().isEmptyOrWhitespace)
             {
                 this.currentLine++;
             }
+
+            if (this.hasReachedEnd)
+                break;
 
             let node = this.tryParseNode();
             if (node != undefined)
@@ -118,8 +126,12 @@ class DocumentParser {
             return undefined;
         }
         
-        let userIncludePath = match[1];
+        let userIncludePath = match[2];
         let absolutePath = path.resolve(path.dirname(this.document.fileName), userIncludePath);
+
+        let pathRange = new Range(
+            line.range.start.line, match[1].length,
+            line.range.start.line, match[1].length + match[2].length);
 
         this.currentLine++;
         
@@ -127,8 +139,11 @@ class DocumentParser {
             type: NodeType.Include,
             sourceDocument: this.documentNode,
             range: line.range,
-            relativePath: userIncludePath,
-            absolutePath,
+            path: {
+                absolutePath,
+                relativePath: userIncludePath,
+                range: pathRange
+            },
         };
     }
 
@@ -161,7 +176,7 @@ class DocumentParser {
         while(this.currentLine + offset < this.document.lineCount)
         {
             let line = this.document.lineAt(this.currentLine + offset);
-            
+
             if (RequestEndRegex.test(line.text))
             {
                 break;
@@ -171,11 +186,13 @@ class DocumentParser {
             offset++;
         }
 
-        this.currentLine += offset;
-
         let nonCommentLines = allLines.filter(line => !Selector.isCommentLine(line.text));
-        if (nonCommentLines.length == 0)
+        if (nonCommentLines.every(x => x.isEmptyOrWhitespace)) {
             return undefined;
+        }
+        else {
+            this.currentLine += offset;
+        }
 
         let range = nonCommentLines[0].range;
         if (nonCommentLines.length > 1)
