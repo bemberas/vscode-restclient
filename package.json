@@ -2,7 +2,7 @@
   "name": "bember-rest-client",
   "displayName": "Bember REST Client",
   "description": "Fork of \"REST Client\" for internal use at Bember",
-  "version": "0.20.0",
+  "version": "0.21.1",
   "publisher": "bemberas",
   "author": {
     "name": "Huachao Mao",
@@ -10,7 +10,7 @@
   },
   "icon": "images/rest_icon.png",
   "galleryBanner": {
-    "color": "#000000",
+    "color": "#3f85ab",
     "theme": "dark"
   },
   "license": "MIT",
