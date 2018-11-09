@@ -19,7 +19,7 @@ export class HttpCodeLensProvider implements CodeLensProvider {
             const cmd: Command = {
                 arguments: [document, node.range],
                 title: 'Send Request',
-                command: 'rest-client.request'
+                command: 'bember-rest-client.request'
             };
             blocks.push(new CodeLens(node.range, cmd));
         }

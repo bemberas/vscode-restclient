@@ -19,7 +19,7 @@ export class EnvironmentController {
     public constructor(initEnvironment: EnvironmentPickItem) {
         if (EnvironmentController.settings.showEnvironmentStatusBarItem) {
             this._environmentStatusBarItem = window.createStatusBarItem(StatusBarAlignment.Right, 100);
-            this._environmentStatusBarItem.command = 'rest-client.switch-environment';
+            this._environmentStatusBarItem.command = 'bember-rest-client.switch-environment';
             this._environmentStatusBarItem.text = initEnvironment.label;
             this._environmentStatusBarItem.tooltip = 'Switch REST Client Environment';
             this._environmentStatusBarItem.show();
